@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import classNames from "classnames";
 import Link from "next/link";
+import { useRouter } from "next/router"; // Import useRouter hook
 import { useMenu, useCatalog } from "./contextMenu";
 import { CollapsIcon, LogoIcon } from "./icons";
 
@@ -9,6 +10,7 @@ const Sidebar = () => {
   const [openSubmenu, setOpenSubmenu] = useState(null);
   const { menus } = useMenu();
   const { setCatalogName } = useCatalog();
+  const router = useRouter(); // Initialize useRouter hook
 
   useEffect(() => {
     if (menus && Object.values(menus).length > 0) {
@@ -32,6 +34,11 @@ const Sidebar = () => {
       setOpenSubmenu(menuId);
     }
   };
+
+  const handleGoBack = () => {
+    router.push("/"); // Redirect to the root URL
+  };
+  
 
   return (
     <div
@@ -88,6 +95,12 @@ const Sidebar = () => {
               </div>
             ))}
         </div>
+      </div>
+      {/* Go Back Button */}
+      <div className="mt-auto">
+        <button onClick={handleGoBack} className="flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-text-light bg-light-lighter rounded hover:bg-light-bluer">
+          Go Back
+        </button>
       </div>
     </div>
   );
