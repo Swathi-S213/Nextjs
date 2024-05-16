@@ -1,132 +1,93 @@
+import React, { useState, useEffect } from "react";
 import classNames from "classnames";
 import Link from "next/link";
-import { useRouter } from "next/router";
-import React, { useState, useMemo } from "react";
-import {
-  ArticleIcon,
-  CollapsIcon,
-  HomeIcon,
-  LogoIcon,
-  LogoutIcon,
-  UsersIcon,
-  VideosIcon,
-} from "./icons";
-
-const menuItems = [
-  { id: 1, label: "Home", icon: HomeIcon, link: "/" },
-  { id: 2, label: "Manage Posts", icon: ArticleIcon, link: "/posts" },
-  { id: 3, label: "Manage Users", icon: UsersIcon, link: "/users" },
-  { id: 4, label: "Manage Tutorials", icon: VideosIcon, link: "/tutorials" },
-];
+import { useMenu, useCatalog } from "./contextMenu";
+import { CollapsIcon, LogoIcon } from "./icons";
 
 const Sidebar = () => {
   const [toggleCollapse, setToggleCollapse] = useState(false);
-  const [isCollapsible, setIsCollapsible] = useState(false);
+  const [openSubmenu, setOpenSubmenu] = useState(null);
+  const { menus } = useMenu();
+  const { setCatalogName } = useCatalog();
 
-  const router = useRouter();
-
-  const activeMenu = useMemo(
-    () => menuItems.find((menu) => menu.link === router.pathname),
-    [router.pathname]
-  );
-
-  const wrapperClasses = classNames(
-    "h-screen px-4 pt-8 pb-4 bg-light flex justify-between flex-col",
-    {
-      ["w-80"]: !toggleCollapse,
-      ["w-20"]: toggleCollapse,
+  useEffect(() => {
+    if (menus && Object.values(menus).length > 0) {
+      setOpenSubmenu(Object.values(menus)[0].id);
     }
-  );
-
-  const collapseIconClasses = classNames(
-    "p-4 rounded bg-light-lighter absolute right-0",
-    {
-      "rotate-180": toggleCollapse,
-    }
-  );
-
-  const getNavItemClasses = (menu) => {
-    return classNames(
-      "flex items-center cursor-pointer hover:bg-light-lighter rounded w-full overflow-hidden whitespace-nowrap",
-      {
-        ["bg-light-lighter"]: activeMenu.id === menu.id,
-      }
-    );
-  };
-
-  const onMouseOver = () => {
-    setIsCollapsible(!isCollapsible);
-  };
+  }, [menus]);
 
   const handleSidebarToggle = () => {
     setToggleCollapse(!toggleCollapse);
   };
 
+  const handleSubmenuClick = (submenuId) => {
+    setOpenSubmenu((prevSubmenuId) => (prevSubmenuId === submenuId ? null : submenuId));
+    setCatalogName(submenuId);
+  };
+
+  const handleMenuItemClick = (menuId) => {
+    if (openSubmenu === menuId) {
+      setOpenSubmenu(null); // Close the submenu only if it's already open
+    } else {
+      setOpenSubmenu(menuId);
+    }
+  };
+
   return (
     <div
-      className={wrapperClasses}
-      onMouseEnter={onMouseOver}
-      onMouseLeave={onMouseOver}
+      className={classNames("h-screen px-4 pt-8 pb-4 bg-light flex flex-col", {
+        "w-80": !toggleCollapse,
+        "w-20": toggleCollapse,
+      })}
       style={{ transition: "width 300ms cubic-bezier(0.2, 0, 0, 1) 0s" }}
     >
       <div className="flex flex-col">
-        <div className="flex items-center justify-between relative">
+        <div className="flex items-center justify-between relative logo-container">
           <div className="flex items-center pl-1 gap-4">
-            <LogoIcon />
-            <span
-              className={classNames("mt-2 text-lg font-medium text-text", {
-                hidden: toggleCollapse,
-              })}
-            >
-              Logo
+            <img src="/static/img/Anansi_Favicon.png" alt="Logo" className="w-8 h-8" />
+            <span className={classNames("mt-2 text-lg font-medium text-text", { hidden: toggleCollapse })}>
+              Dashboard
             </span>
           </div>
-          {isCollapsible && (
-            <button
-              className={collapseIconClasses}
-              onClick={handleSidebarToggle}
-            >
-              <CollapsIcon />
-            </button>
-          )}
+          <button className={classNames("p-4 rounded bg-light-lighter", { "rotate-180": toggleCollapse })} onClick={handleSidebarToggle}>
+            <CollapsIcon fill="#6C7281" />
+          </button>
         </div>
-
-        <div className="flex flex-col items-start mt-24">
-          {menuItems.map(({ icon: Icon, ...menu }) => {
-            const classes = getNavItemClasses(menu);
-            return (
-              <div className={classes}>
-                <Link href={menu.link}>
-                  <a className="flex py-4 px-3 items-center w-full h-full">
-                    <div style={{ width: "2.5rem" }}>
-                      <Icon />
+        <div className="flex flex-col items-start mt-4">
+          {menus &&
+            Object.values(menus).map((menu) => (
+              <div key={menu.id} className="relative">
+                <div
+                  className={classNames("flex flex-col py-4 px-3 items-start w-full cursor-pointer", {
+                    "bg-light-bluer": openSubmenu === menu.id,
+                  })}
+                  onClick={() => {
+                    handleMenuItemClick(menu.id);
+                  }}
+                >
+                  <span className={classNames("text-md font-medium text-text-light", { "ml-2": !toggleCollapse })}>
+                    {menu.label}
+                  </span>
+                  {openSubmenu === menu.id && (
+                    <div className="ml-2">
+                      {menu.submenus.map((submenu) => (
+                        <Link key={submenu.id} href={submenu.link}>
+                          <a
+                            className="block py-2 px-3 text-md font-medium text-text-light hover:bg-light-bluer"
+                            onClick={(e) => {
+                              e.stopPropagation(); // Prevent event from propagating to parent elements
+                            }}
+                          >
+                            {submenu.label}
+                          </a>
+                        </Link>
+                      ))}
                     </div>
-                    {!toggleCollapse && (
-                      <span
-                        className={classNames(
-                          "text-md font-medium text-text-light"
-                        )}
-                      >
-                        {menu.label}
-                      </span>
-                    )}
-                  </a>
-                </Link>
+                  )}
+                </div>
               </div>
-            );
-          })}
+            ))}
         </div>
-      </div>
-
-      <div className={`${getNavItemClasses({})} px-3 py-4`}>
-        <div style={{ width: "2.5rem" }}>
-          <LogoutIcon />
-        </div>
-        {!toggleCollapse && (
-          <span className={classNames("text-md font-medium text-text-light")}>
-            Logout
-          </span>
-        )}
       </div>
     </div>
   );

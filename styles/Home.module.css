@@ -103,6 +103,10 @@
   line-height: 1.5;
 }
 
+.bg-blue {
+  background-color: lightblue;
+}
+
 .logo {
   height: 1em;
   margin-left: 0.5rem;
@@ -114,3 +118,15 @@
     flex-direction: column;
   }
 }
+
+.pagination {
+  display: flex;
+  justify-content: center;
+}
+
+.active-page {
+  background-color: blue;
+  color: white;
+}
+
+

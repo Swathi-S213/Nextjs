@@ -12,6 +12,7 @@ module.exports = {
       ...defaultTheme.colors,
       primary: "#3B81F6",
       white: '#ffffff',
+      red: "#1F2937",
       text: {
         DEFAULT: "#1F2937",
         light: "#6C7281",
@@ -19,9 +20,14 @@ module.exports = {
       light: {
         DEFAULT: "#FAFBFC",
         lighter: "#F3F4F6",
+        bluer: "#d3ecef"
       },
     },
-    extend: {},
+    extend: {
+      fontFamily: {
+        'lusitana': ['Lusitana', 'serif'],
+      },
+    },
   },
   plugins: [],
 }
